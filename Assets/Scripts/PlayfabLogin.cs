@@ -16,12 +16,30 @@ public class PlayfabLogin : MonoBehaviour, IDisposable
     [SerializeField] private String _logInSuccess = "Authorization complete!";
     [SerializeField] private String _logInError = "Authorization error!";
 
+    private const string AuthGuidKey = "auth_guid_key"; 
+
     private void Start() 
     {
         if (string.IsNullOrEmpty(PlayFabSettings.staticSettings.TitleId))
         {
             PlayFabSettings.staticSettings.TitleId = "74E99";
         }
+
+        var needCreation = PlayerPrefs.HasKey(AuthGuidKey);
+        var id = PlayerPrefs.GetString(AuthGuidKey, Guid.NewGuid().ToString());
+
+        var request = new LoginWithCustomIDRequest
+        {
+            CustomId = id,
+            CreateAccount = !needCreation
+        };
+
+        PlayFabClientAPI.LoginWithCustomID(request, result =>
+        {
+            PlayerPrefs.SetString(AuthGuidKey, id);
+            OnLoginSuccess(result);
+        }, OnLoginError);
+
         _logInButton.onClick.AddListener(OnLogInClick);
     }
 

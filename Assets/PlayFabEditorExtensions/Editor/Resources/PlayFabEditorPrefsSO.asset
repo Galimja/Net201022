@@ -17,7 +17,7 @@ MonoBehaviour:
   SelectedStudio: DzuraINC
   SdkPath: Assets/PlayFabSDK
   EdExPath: 
-  LocalCloudScriptPath: 
+  LocalCloudScriptPath: C:/Unity/Net201022/Assets/PlayFabEditorExtensions/Editor/Resources/.CloudScript.js
   PanelIsShown: 0
-  curMainMenuIdx: 4
-  curSubMenuIdx: 0
+  curMainMenuIdx: 1
+  curSubMenuIdx: 2

@@ -4,6 +4,8 @@ using PlayFab.ClientModels;
 using System;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections.Generic;
+using System.Linq;
 
 public class PlayfabLogin : MonoBehaviour, IDisposable
 {
@@ -40,7 +42,7 @@ public class PlayfabLogin : MonoBehaviour, IDisposable
             OnLoginSuccess(result);
         }, OnLoginError);
 
-        _logInButton.onClick.AddListener(OnLogInClick);
+        //_logInButton.onClick.AddListener(OnLogInClick);
     }
 
     private void OnLogInClick()
@@ -60,15 +62,86 @@ public class PlayfabLogin : MonoBehaviour, IDisposable
     {
         var errorMessage = error.GenerateErrorReport();
         Debug.LogError(errorMessage);
-        SetLabel(_logInError, _colorError);
+       // SetLabel(_logInError, _colorError);
         
     }
 
     private void OnLoginSuccess(LoginResult result)
     {
         Debug.Log("Complete login!!");
-        SetLabel(_logInSuccess, _colorSuccess);
+        //SetLabel(_logInSuccess, _colorSuccess);
 
+        SetUserData(result.PlayFabId);
+        //MakePurchase();
+        GetInventory();
+    }
+
+    private void GetInventory()
+    {
+        PlayFabClientAPI.GetUserInventory(new GetUserInventoryRequest(),
+            result => ShowInventory(result.Inventory), OnLoginError);
+    }
+
+    private void ShowInventory(List<ItemInstance> inventory)
+    {
+        var firstItem = inventory.First();
+        Debug.Log($"{firstItem.ItemId}");
+        ConsumePotion(firstItem.ItemInstanceId);
+    }
+
+    private void ConsumePotion(string itemInstanceId)
+    {
+        PlayFabClientAPI.ConsumeItem(new ConsumeItemRequest
+        {
+            ConsumeCount = 1,
+            ItemInstanceId = itemInstanceId
+        }, result =>
+        {
+            Debug.Log("Complate consume item");
+        }, OnLoginError);
+    }
+
+    private void MakePurchase()
+    {
+        PlayFabClientAPI.PurchaseItem(new PurchaseItemRequest
+        {
+            CatalogVersion = "main",
+            ItemId = "health_potion",
+            Price = 3,
+            VirtualCurrency = "SC"
+        }, result =>
+        {
+            Debug.Log("Complate purchase item");
+        }, OnLoginError);
+    }
+
+    private void SetUserData(string playFabId)
+    {
+        PlayFabClientAPI.UpdateUserData(new UpdateUserDataRequest
+        {
+            Data = new Dictionary<string, string>
+            {
+                {"time_recieve_daily_revard", DateTime.UtcNow.ToString()}
+            }
+        }, result =>
+        {
+            Debug.Log("SetUserData");
+            GetUserData(playFabId, "time_recieve_daily_revard");
+        }, OnLoginError);
+    }
+
+    private void GetUserData(string playFabId, string keyData)
+    {
+        PlayFabClientAPI.GetUserData(new GetUserDataRequest
+        {
+            PlayFabId = playFabId
+        }, res =>
+        {
+            if (res.Data.ContainsKey(keyData))
+            {
+                Debug.Log($"{keyData}: {res.Data[keyData].Value}");
+            }
+        }, OnLoginError);
     }
 
     private void SetLabel(String text, Color color)
@@ -79,6 +152,6 @@ public class PlayfabLogin : MonoBehaviour, IDisposable
 
     public void Dispose()
     {
-        _logInButton.onClick?.RemoveAllListeners();
+        //_logInButton.onClick?.RemoveAllListeners();
     }
 }

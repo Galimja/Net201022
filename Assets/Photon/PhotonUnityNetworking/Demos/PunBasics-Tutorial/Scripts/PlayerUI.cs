@@ -35,6 +35,9 @@ namespace Photon.Pun.Demo.PunBasics
 	    [SerializeField]
 	    private Slider playerHealthSlider;
 
+		[SerializeField]
+		private Text _idText;
+
         PlayerManager target;
 
 		float characterControllerHeight;
@@ -79,6 +82,8 @@ namespace Photon.Pun.Demo.PunBasics
 			if (playerHealthSlider != null) {
 				playerHealthSlider.value = target.Health;
 			}
+
+			_idText.text = target.Id.ToString();
 		}
 
 		/// <summary>

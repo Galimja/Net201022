@@ -99,6 +99,7 @@ public class PlayfabAccountManager : MonoBehaviour
 
     private void ShowCharactersInSlot(List<CharacterResult> characters)
     {
+        
         if (characters.Count == 0)
         {
             foreach (var slot in _slots)
@@ -106,26 +107,37 @@ public class PlayfabAccountManager : MonoBehaviour
         }
         else if (characters.Count > 0 && characters.Count <= _slots.Count)
         {
-            PlayFabClientAPI.GetCharacterStatistics(new GetCharacterStatisticsRequest 
-            { 
-                CharacterId = characters.First().CharacterId
-            }, result =>
+            for (int i = 0; i < characters.Count; i++)
             {
-                var level = result.CharacterStatistics["level"].ToString();
-                var gold = result.CharacterStatistics["gold"].ToString();
-                var exp = result.CharacterStatistics["exp"].ToString();
-                var hp = result.CharacterStatistics["hp"].ToString();
-                var dmg = result.CharacterStatistics["dmg"].ToString();
-
-                _slots.First().ShowInfoCharacterSlot(characters.First().CharacterName, 
-                    level, gold, exp, hp, dmg);
-            }, OnError);
-
+                
+                GetCharacterStats(characters, i);
+            }
+            for (int i = characters.Count; i < _slots.Count; i++)
+            {
+                _slots[i].ShowemptySlot();
+            }
         }
         else
         {
             Debug.LogError("Add slots for characters");
         }
+    }
+
+    private void GetCharacterStats(List<CharacterResult> characters, int i)
+    {
+        PlayFabClientAPI.GetCharacterStatistics(new GetCharacterStatisticsRequest
+        {
+            CharacterId = characters[i].CharacterId
+        }, result =>
+        {
+            var level = result.CharacterStatistics["level"].ToString();
+            var gold = result.CharacterStatistics["gold"].ToString();
+            var exp = result.CharacterStatistics["exp"].ToString();
+            var hp = result.CharacterStatistics["hp"].ToString();
+            var dmg = result.CharacterStatistics["dmg"].ToString();
+            _slots[i].ShowInfoCharacterSlot(characters[i].CharacterName,
+                    level, gold, exp, hp, dmg);
+        }, OnError);
     }
 
     private void OnGetRandomResultTables(PlayFab.ServerModels.GetRandomResultTablesResult result)
